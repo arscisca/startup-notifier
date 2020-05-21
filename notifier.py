@@ -6,10 +6,14 @@ import pushover
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+
+def real_path(fname):
+    return os.path.join(__location__, fname)
+
+
 def read_token(ftoken):
     # Set the correct path
-    ftoken = os.path.join(__location__, ftoken)
-    with open(ftoken, 'r') as f:
+    with open(real_path(ftoken), 'r') as f:
         return f.readline().strip()
 
 
@@ -29,5 +33,5 @@ if __name__ == '__main__':
         .format(dev=hostname,ip_pub=ipdata['ip'], city=ipdata['location']['city'],
                 country=ipdata['location']['country'], lat=ipdata['location']['lat'], long=ipdata['location']['lng'])
 
-    po_client = pushover.Client(config_path='.pushoverrc')
+    po_client = pushover.Client(config_path=real_path('.pushoverrc'))
     po_client.send_message(message, title=title, timestamp=True)
