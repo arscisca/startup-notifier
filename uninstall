@@ -1,0 +1,23 @@
+#!/bin/bash
+PATH_TO_REPO=${BASH_SOURCE[0]}
+cd "$(dirname $PATH_TO_REPO)"
+PATH_TO_REPO=$(pwd)
+
+sudo -v
+echo "This script will uninstall your ska-startup-notifier daemon, and it will"\
+	" delete the support files created. The git repository WILL NOT be deleted."
+read -p "Are you sure you want to continue? " -n 1 -r
+echo ''
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+	SERVICE_NAME="ska-startup-notifier"
+	SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+
+	echo "Removing additional files"
+	rm -f .ipify-token .pushoverrc
+
+	echo "Uninstalling service"
+	sudo systemctl stop "$SERVICE_NAME.service"
+	sudo systemctl disable "$SERVICE_NAME.service"
+	sudo rm -f $"SERVICE_FILE"
+fi

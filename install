@@ -1,0 +1,65 @@
+#!/bin/bash
+# Ask user to insert sudo password for later operations
+sudo -v
+
+# Ensure current working directory is inside the repository
+PATH_TO_REPO=${BASH_SOURCE[0]}
+cd "$(dirname $PATH_TO_REPO)"
+PATH_TO_REPO=$(pwd)
+
+echo "Installing Startup Notifier..."
+echo "Installing Python requirements..."
+# Check OS to run pip with the correct flags
+case "$OSTYPE" in
+  linux-gnu*)
+    python3 -m pip install -r requirements.txt | sed 's/^/    /'
+    ;;
+  darwin*)
+    #python3 -m pip install -r requirements.txt --user
+	echo "Your operating system is not supported. Quitting."
+	exit 2
+	;;
+  *)
+    echo "Your operating system is not supported. Quitting."
+    exit 2
+    ;;
+esac
+
+echo "Initializing directory..."
+tmpdir=$(mktemp -d)
+tar -xf archive.tar.gz --directory="$tmpdir"
+# Simply copy api keys and setup templates if they don't exist
+for file in {'ipify-token','pushoverrc'}
+do
+	target=".$file"
+	if [[ ! -e "$target" ]]
+	then
+		cp -v "$tmpdir/tmp/$file.template" "$target" | sed 's/^/    copied '
+	else
+		echo "    $target already exists"
+	fi
+done
+
+echo "Building service..."
+# Expand variables inside service
+SERVICE_NAME="ska-startup-notifier"
+SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+if [[ ! -e "$SERVICE_FILE" ]]
+then
+	sudo cat "$tmpdir/tmp/ska-startup-notifier.service.template" | \
+		sed "s~\$USER~$USER~g" | sed "s~\$PATH_TO_REPO~$PATH_TO_REPO~g" \
+		> "$SERVICE_FILE"
+	sudo chmod 644 $SERVICE_FILE
+	echo "    created $SERVICE_FILE"
+else
+	echo "    $SERVICE_FILE already exists"
+fi
+# Enable service
+sudo systemctl enable "$SERVICE_NAME.service"
+sudo systemctl daemon-reload
+
+echo "Service installed!"
+echo
+echo "Your service is almost ready to run. Please update your $PATH_TO_REPO/.ipify-token and $PATH_TO_REPO/.pushoverrc files and include your API keys."
+echo "After that your startup notifier will be ready."
+exit 0
