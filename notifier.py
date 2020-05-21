@@ -1,9 +1,14 @@
+import os
 import socket
 import urllib.request
 import json
 import pushover
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 def read_token(ftoken):
+    # Set the correct path
+    ftoken = os.path.join(__location__, ftoken)
     with open(ftoken, 'r') as f:
         return f.readline().strip()
 
