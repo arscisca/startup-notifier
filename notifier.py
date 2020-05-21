@@ -21,7 +21,7 @@ if __name__ == '__main__':
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     # Send notification
-    title = "{dev} turned on".format(dev=hostname)
+    title = "Startup Notifier: '{dev}' is onnline".format(dev=hostname)
     message = "{dev} is online and connected with IP {ip_pub}, localized in {city}, {country} ({lat} N, {long} E)." \
         .format(dev=hostname,ip_pub=ipdata['ip'], city=ipdata['location']['city'],
                 country=ipdata['location']['country'], lat=ipdata['location']['lat'], long=ipdata['location']['lng'])
