@@ -34,7 +34,7 @@ do
 	target=".$file"
 	if [[ ! -e "$target" ]]
 	then
-		cp -v "$tmpdir/tmp/$file.template" "$target" | sed 's/^/    copied '
+		cp -v "$tmpdir/tmp/$file.template" "$target" | sed 's/^/    copied /'
 	else
 		echo "    $target already exists"
 	fi
@@ -46,10 +46,11 @@ SERVICE_NAME="ska-startup-notifier"
 SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
 if [[ ! -e "$SERVICE_FILE" ]]
 then
-	sudo cat "$tmpdir/tmp/ska-startup-notifier.service.template" | \
-		sed "s~\$USER~$USER~g" | sed "s~\$PATH_TO_REPO~$PATH_TO_REPO~g" \
-		> "$SERVICE_FILE"
-	sudo chmod 644 $SERVICE_FILE
+	sudo bash -c 'cat "$tmpdir/tmp/ska-startup-notifier.service.template" | \
+		sed "s~\$USER~$USER~g" | \
+		sed "s~\$PATH_TO_REPO~$PATH_TO_REPO~g" \
+		> "$SERVICE_FILE"'
+	sudo chmod 644 "$SERVICE_FILE"
 	echo "    created $SERVICE_FILE"
 else
 	echo "    $SERVICE_FILE already exists"
